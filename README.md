@@ -2,7 +2,9 @@
 
 Supervisor configuration with console commands for nette applications.
 
+[![Downloads total](https://img.shields.io/packagist/dt/pd/supervisor.svg)](https://packagist.org/packages/pd/supervisor)
 [![Build Status](https://travis-ci.org/peckadesign/Supervisor.svg?branch=master)](https://travis-ci.org/peckadesign/Supervisor)
+[![Latest Stable Version](https://poser.pugx.org/pd/supervisor/v/stable)](https://github.com/peckadesign/Supervisor/releases)
 
 ## Installation
 
