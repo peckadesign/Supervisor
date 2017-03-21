@@ -26,7 +26,7 @@
 		"php": "~7.0",
 		"nette/application": "^2.2",
 		"nette/di": "^2.2",
-		"kdyby/console": "^1.0.0",
+		"kdyby/console": "^2.3.2",
 		"supervisorphp/configuration": "~0.2.1"
 	},
 	"require-dev": {

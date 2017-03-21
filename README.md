@@ -2,6 +2,8 @@
 
 Supervisor configuration with console commands for nette applications.
 
+[![Build Status](https://travis-ci.org/peckadesign/Supervisor.svg?branch=master)](https://travis-ci.org/peckadesign/Supervisor)
+
 ## Installation
 
 The best way to install PeckaDesign/Supervisor is using  [Composer](http://getcomposer.org/):
