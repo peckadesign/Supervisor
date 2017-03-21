@@ -18,7 +18,7 @@ $ composer require pd/supervisor
 
 Enable extension in your application configuration:
 
-```neon
+```yaml
 extensions:
 	supervisor: Pd\Supervisor\DI\SupervisorExtension
 ```
@@ -32,8 +32,12 @@ supervisor:
 			autorestart: on
 
 	configuration:
+		group:
+			group-name:
+				programs:
+					- program-name
 		program:
-			name:
+			program-name:
 				command: moo
 ```
 

@@ -4,7 +4,7 @@ php:
     - 7.1
 
 script:
-    - vendor/bin/phpstan analyse -l 5 -c phpstan.neon src
+    - vendor/bin/phpstan analyse -l 5 src
 
 before_script:
     - travis_retry composer install --no-interaction --prefer-dist
