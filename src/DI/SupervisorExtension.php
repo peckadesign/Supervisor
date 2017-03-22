@@ -17,6 +17,7 @@ final class SupervisorExtension extends CompilerExtension
 {
 
 	const DEFAULTS = [
+		'prefix' => NULL,
 		'configuration' => [],
 		'defaults' => [],
 	];
@@ -33,7 +34,11 @@ final class SupervisorExtension extends CompilerExtension
 			}
 		}
 
-		$this->loadSupervisorConfiguration($config['configuration'], $config['defaults']);
+		$this->loadSupervisorConfiguration(
+			(array) $config['configuration'],
+			(array) $config['defaults'],
+			isset($config['prefix']) ? (string) $config['prefix'] : NULL
+		);
 
 		$builder->addDefinition($this->prefix('renderCommand'))
 			->setClass(RenderCommand::class, [strtr($this->prefix('render'), '.', ':')])
@@ -46,7 +51,7 @@ final class SupervisorExtension extends CompilerExtension
 	}
 
 
-	private function loadSupervisorConfiguration(array $config, array $defaults = [])
+	private function loadSupervisorConfiguration(array $config, array $defaults = [], string $prefix = NULL)
 	{
 		$builder = $this->getContainerBuilder();
 
@@ -59,9 +64,13 @@ final class SupervisorExtension extends CompilerExtension
 			}
 			if (is_subclass_of($sectionClass, Named::class)) {
 				foreach ((array) $sectionConfig as $name => $properties) {
+					$name = Helpers::expand($name, $builder->parameters);
+					if ($prefix !== NULL) {
+						$name = sprintf('%s-%s', $prefix, $name);
+					}
 					$configuration->addSetup('addSection', [
 						new Statement($sectionClass, [
-							Helpers::expand($name, $builder->parameters),
+							$name,
 							isset($defaults[$sectionName]) ? $this->mergeProperties($properties, $defaults[$sectionName]) : $properties,
 						]),
 					]);
