@@ -27,6 +27,8 @@ Now you can configure your supervisor.
 
 ```yaml
 supervisor:
+	prefix: my-project #prefixes every named section
+
 	defaults:
 		program:
 			autorestart: on
