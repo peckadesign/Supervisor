@@ -23,14 +23,14 @@
 		}
 	],
 	"require": {
-		"php": "~7.0",
-		"nette/application": "^2.2",
-		"nette/di": "^2.2",
-		"kdyby/console": "^2.3.2",
+		"php": "~7.1",
+		"nette/application": "~2.4.14",
+		"nette/di": "~2.4.14",
+		"kdyby/console": "~2.7.1",
 		"supervisorphp/configuration": "~0.2.1"
 	},
 	"require-dev": {
-		"phpstan/phpstan": "~0.6.0"
+		"phpstan/phpstan": "0.12.11"
 	},
 	"autoload": {
 		"psr-4": {
