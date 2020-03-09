@@ -57,11 +57,17 @@ final class WriteCommand extends Command
 				$loader->load($configuration);
 			} catch (LoaderException $exception) {
 				$output->writeln($exception->getMessage());
+
+				return 1;
 			}
 		}
 		if ($writer->write($configuration)) {
 			$output->writeln(sprintf('Supervisor configuration has been successfully written to file %s', $filesystemAdapter->applyPathPrefix($file)));
+
+			return 0;
 		}
+
+		return 1;
 	}
 
 }

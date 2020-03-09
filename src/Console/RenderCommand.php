@@ -42,6 +42,8 @@ final class RenderCommand extends Command
 		 */
 		$configuration = $this->container->getByType(Configuration::class);
 		$output->write($this->getRenderer()->render($configuration->toArray()));
+
+		return 0;
 	}
 
 }
