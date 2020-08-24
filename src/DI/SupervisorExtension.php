@@ -20,6 +20,7 @@ final class SupervisorExtension extends CompilerExtension
 		'prefix' => NULL,
 		'configuration' => [],
 		'defaults' => [],
+		'group' => NULL,
 	];
 
 
@@ -28,6 +29,13 @@ final class SupervisorExtension extends CompilerExtension
 		$builder = $this->getContainerBuilder();
 
 		$config = $this->getConfig(self::DEFAULTS);
+
+		if ( ! isset($config['prefix'])) {
+			throw new \Pd\Supervisor\DI\MissingConfigurationValueException(
+				'Parametr \'prefix\' pro extension \'supervisor\' je vyzadovany. Doplnte jej a jako hodnotu vyberte idealne nazev projektu.'
+			);
+		}
+
 		foreach ($this->compiler->getExtensions() as $extension) {
 			if ($extension instanceof IConfigurationProvider) {
 				$config['configuration'] = array_merge_recursive($extension->getSupervisorConfiguration(), $config['configuration']);
@@ -37,7 +45,8 @@ final class SupervisorExtension extends CompilerExtension
 		$this->loadSupervisorConfiguration(
 			(array) $config['configuration'],
 			(array) $config['defaults'],
-			isset($config['prefix']) ? (string) $config['prefix'] : NULL
+			(string) $config['prefix'],
+			isset($config['group']) ? (string) $config['group'] : NULL
 		);
 
 		$builder->addDefinition($this->prefix('renderCommand'))
@@ -51,23 +60,21 @@ final class SupervisorExtension extends CompilerExtension
 	}
 
 
-	private function loadSupervisorConfiguration(array $config, array $defaults = [], string $prefix = NULL)
+	private function loadSupervisorConfiguration(array $config, array $defaults = [], string $prefix, string $group = NULL)
 	{
 		$builder = $this->getContainerBuilder();
 
 		$configuration = $builder->addDefinition($this->prefix('configuration'))
 			->setClass(Configuration::class)
 		;
+
 		foreach ($config as $sectionName => $sectionConfig) {
 			if ( ! $sectionClass = (new Configuration)->findSection($sectionName)) {
 				$sectionClass = GenericSection::class;
 			}
 			if (is_subclass_of($sectionClass, Named::class)) {
 				foreach ((array) $sectionConfig as $name => $properties) {
-					$name = Helpers::expand($name, $builder->parameters);
-					if ($prefix !== NULL) {
-						$name = sprintf('%s-%s', $prefix, $name);
-					}
+					$name = $this->prepareName($name, $prefix);
 					$configuration->addSetup('addSection', [
 						new Statement($sectionClass, [
 							$name,
@@ -84,6 +91,8 @@ final class SupervisorExtension extends CompilerExtension
 				]);
 			}
 		}
+
+		$this->prepareGroup($config, $configuration, $prefix, $group);
 	}
 
 
@@ -98,5 +107,39 @@ final class SupervisorExtension extends CompilerExtension
 		}
 
 		return $properties;
+	}
+
+
+	private function prepareName(string $name, string $prefix): string
+	{
+		$builder = $this->getContainerBuilder();
+		$name = Helpers::expand($name, $builder->parameters);
+
+		$name = sprintf('%s-%s', $prefix, $name);
+
+		return $name;
+	}
+
+
+	private function prepareGroup(array $config, \Nette\DI\ServiceDefinition $configuration, string $prefix, string $group = NULL): void
+	{
+		if ( ! $group) {
+			return;
+		}
+
+		$webPrograms = implode(',', array_map(function ($name) use ($prefix): string {
+			return $this->prepareName($name, $prefix);
+		}, array_keys($config['program'])));
+
+		$sectionClass = (new Configuration)->findSection('group');
+		$configuration->addSetup('addSection', [
+			new Statement(
+				$sectionClass,
+				[
+					$group,
+					['programs' => $webPrograms],
+				]
+			)
+		]);
 	}
 }
