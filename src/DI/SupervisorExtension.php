@@ -28,7 +28,7 @@ final class SupervisorExtension extends CompilerExtension
 	{
 		$builder = $this->getContainerBuilder();
 
-		$config = $this->getConfig(self::DEFAULTS);
+		$config = \Pd\Supervisor\Adapter\Nette\DI\CompilerExtensionAdapter::mergeConfigWithDefaults($this, self::DEFAULTS);
 
 		if ( ! isset($config['prefix'])) {
 			throw new \Pd\Supervisor\DI\MissingConfigurationValueException(
