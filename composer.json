@@ -24,9 +24,9 @@
 	],
 	"require": {
 		"php": "~7.1",
-		"nette/application": "~2.4.14|~3.0.0",
-		"nette/di": "~2.4.14|~3.0.0",
-		"kdyby/console": "~2.7.1|dev-master",
+		"nette/application": "~3.0.0",
+		"nette/di": "~3.0.0",
+		"kdyby/console": "~2.8.0",
 		"supervisorphp/configuration": "~0.2.1"
 	},
 	"require-dev": {

@@ -15,25 +15,30 @@ use Supervisor\Configuration\Section\Named;
 final class SupervisorExtension extends CompilerExtension
 {
 
-	const DEFAULTS = [
-		'prefix' => NULL,
-		'configuration' => [],
-		'defaults' => [],
-		'group' => NULL,
-	];
+	public function getConfigSchema(): \Nette\Schema\Schema
+	{
+		return \Nette\Schema\Expect::structure(
+			[
+				'prefix' => \Nette\Schema\Expect::string(),
+				'configuration' => \Nette\Schema\Expect::array([]),
+				'defaults' => \Nette\Schema\Expect::array([]),
+				'group' => \Nette\Schema\Expect::string()->nullable(),
+			]
+		)->castTo(\Pd\Supervisor\Adapter\Nette\DI\ConfigObject::class);
+	}
+
+
+	public function getConfig(): \Pd\Supervisor\Adapter\Nette\DI\ConfigObject
+	{
+		\assert($this->config instanceof \Pd\Supervisor\Adapter\Nette\DI\ConfigObject);
+
+		return $this->config;
+	}
 
 
 	public function loadConfiguration()
 	{
 		$builder = $this->getContainerBuilder();
-
-		$config = \Pd\Supervisor\Adapter\Nette\DI\CompilerExtensionAdapter::mergeConfigWithDefaults($this, self::DEFAULTS);
-
-		if ( ! isset($config['prefix'])) {
-			throw new \Pd\Supervisor\DI\MissingConfigurationValueException(
-				'Parametr \'prefix\' pro extension \'supervisor\' je vyzadovany. Doplnte jej a jako hodnotu vyberte idealne nazev projektu.'
-			);
-		}
 
 		foreach ($this->compiler->getExtensions() as $extension) {
 			if ($extension instanceof IConfigurationProvider) {
@@ -42,10 +47,10 @@ final class SupervisorExtension extends CompilerExtension
 		}
 
 		$this->loadSupervisorConfiguration(
-			(array) $config['configuration'],
-			(array) $config['defaults'],
-			(string) $config['prefix'],
-			isset($config['group']) ? (string) $config['group'] : NULL
+			(array) $this->getConfig()->configuration,
+			(array) $this->getConfig()->defaults,
+			(string) $this->getConfig()->prefix,
+			isset($this->getConfig()->group) ? (string) $this->getConfig()->group : NULL
 		);
 
 		$builder->addDefinition($this->prefix('renderCommand'))
@@ -75,7 +80,7 @@ final class SupervisorExtension extends CompilerExtension
 				foreach ((array) $sectionConfig as $name => $properties) {
 					$name = $this->prepareName($name, $prefix);
 					$configuration->addSetup('addSection', [
-						\Pd\Supervisor\Adapter\Nette\DI\DiStatementFactory::createDiStatement($sectionClass, [
+						new \Nette\DI\Definitions\Statement($sectionClass, [
 							$name,
 							isset($defaults[$sectionName]) ? $this->mergeProperties($properties, $defaults[$sectionName]) : $properties,
 						]),
@@ -83,7 +88,7 @@ final class SupervisorExtension extends CompilerExtension
 				}
 			} else {
 				$configuration->addSetup('addSection', [
-					\Pd\Supervisor\Adapter\Nette\DI\DiStatementFactory::createDiStatement(
+					new \Nette\DI\Definitions\Statement(
 						$sectionClass, [
 						isset($defaults[$sectionName]) ? $this->mergeProperties($sectionConfig, $defaults[$sectionName]) : $sectionConfig,
 					]),
@@ -121,7 +126,7 @@ final class SupervisorExtension extends CompilerExtension
 
 
 	/**
-	 * @param \Nette\DI\ServiceDefinition|\Nette\DI\Definitions\ServiceDefinition $configuration
+	 * @param \Nette\DI\Definitions\ServiceDefinition $configuration
 	 */
 	private function prepareGroup(array $config, $configuration, string $prefix, string $group = NULL): void
 	{
@@ -135,7 +140,7 @@ final class SupervisorExtension extends CompilerExtension
 
 		$sectionClass = (new Configuration)->findSection('group');
 		$configuration->addSetup('addSection', [
-			\Pd\Supervisor\Adapter\Nette\DI\DiStatementFactory::createDiStatement(
+			new \Nette\DI\Definitions\Statement(
 				$sectionClass,
 				[
 					$group,
