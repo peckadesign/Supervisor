@@ -39,18 +39,19 @@ final class SupervisorExtension extends CompilerExtension
 	public function loadConfiguration()
 	{
 		$builder = $this->getContainerBuilder();
+		$configObject = $this->getConfig();
 
 		foreach ($this->compiler->getExtensions() as $extension) {
 			if ($extension instanceof IConfigurationProvider) {
-				$config['configuration'] = array_merge_recursive($extension->getSupervisorConfiguration(), $config['configuration']);
+				$configObject->configuration = array_merge_recursive($extension->getSupervisorConfiguration(), $configObject->configuration);
 			}
 		}
 
 		$this->loadSupervisorConfiguration(
-			(array) $this->getConfig()->configuration,
-			(array) $this->getConfig()->defaults,
-			(string) $this->getConfig()->prefix,
-			isset($this->getConfig()->group) ? (string) $this->getConfig()->group : NULL
+			(array) $configObject->configuration,
+			(array) $configObject->defaults,
+			$configObject->prefix,
+			isset($configObject->group) ? (string) $configObject->group : NULL
 		);
 
 		$builder->addDefinition($this->prefix('renderCommand'))
