@@ -65,7 +65,7 @@ final class SupervisorExtension extends CompilerExtension
 	}
 
 
-	private function loadSupervisorConfiguration(array $config, array $defaults = [], string $prefix, string $group = NULL)
+	private function loadSupervisorConfiguration(array $config, array $defaults, string $prefix, ?string $group)
 	{
 		$builder = $this->getContainerBuilder();
 
@@ -129,7 +129,7 @@ final class SupervisorExtension extends CompilerExtension
 	/**
 	 * @param \Nette\DI\ServiceDefinition|\Nette\DI\Definitions\ServiceDefinition $configuration
 	 */
-	private function prepareGroup(array $config, $configuration, string $prefix, string $group = NULL): void
+	private function prepareGroup(array $config, $configuration, string $prefix, ?string $group): void
 	{
 		if ( ! $group) {
 			return;
