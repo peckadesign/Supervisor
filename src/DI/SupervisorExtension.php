@@ -48,6 +48,12 @@ final class SupervisorExtension extends CompilerExtension
 			isset($config['group']) ? (string) $config['group'] : NULL
 		);
 
+		$builder->addDefinition($this->prefix('renderer'))
+			->setFactory(\Indigo\Ini\Renderer::class, [
+				\Indigo\Ini\Renderer::ARRAY_MODE_CONCAT | \Indigo\Ini\Renderer::BOOLEAN_MODE_BOOL_STRING,
+			])
+		;
+
 		$builder->addDefinition($this->prefix('renderCommand'))
 			->setFactory(RenderCommand::class, [strtr($this->prefix('render'), '.', ':')])
 			->addTag(ConsoleExtension::TAG_COMMAND)
