@@ -19,3 +19,5 @@ jobs:
       - run: make composer
 
       - run: make phpstan
+
+      - run: make tester
