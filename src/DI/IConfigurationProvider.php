@@ -5,5 +5,9 @@ namespace Pd\Supervisor\DI;
 interface IConfigurationProvider
 {
 
+	/**
+	 * @return array<string, mixed>
+	 */
 	public function getSupervisorConfiguration(): array;
+
 }

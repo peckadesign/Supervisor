@@ -27,14 +27,14 @@ final class RenderCommand extends Command
 	}
 
 
-	protected function configure()
+	protected function configure(): void
 	{
 		parent::configure();
 		$this->setDescription('Renders supervisor configuration');
 	}
 
 
-	protected function execute(InputInterface $input, OutputInterface $output)
+	protected function execute(InputInterface $input, OutputInterface $output): int
 	{
 		$output->write($this->renderer->render($this->configuration->toArray()));
 

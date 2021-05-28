@@ -68,6 +68,10 @@ final class SupervisorExtension extends CompilerExtension
 	}
 
 
+	/**
+	 * @param array<string, mixed> $config
+	 * @param array<string, mixed> $defaults
+	 */
 	private function loadSupervisorConfiguration(array $config, array $defaults, string $prefix, ?string $group): void
 	{
 		$builder = $this->getContainerBuilder();
@@ -104,6 +108,11 @@ final class SupervisorExtension extends CompilerExtension
 	}
 
 
+	/**
+	 * @param array<string, mixed> $properties
+	 * @param array<string, mixed> $defaults
+	 * @return array<string, mixed>
+	 */
 	private function mergeProperties(array $properties, array $defaults = []): array
 	{
 		foreach ($defaults as $key => $value) {
@@ -130,6 +139,7 @@ final class SupervisorExtension extends CompilerExtension
 
 
 	/**
+	 * @param array<string, mixed> $config
 	 * @param \Nette\DI\ServiceDefinition|\Nette\DI\Definitions\ServiceDefinition $configuration
 	 */
 	private function prepareGroup(array $config, $configuration, string $prefix, ?string $group): void

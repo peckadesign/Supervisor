@@ -25,7 +25,7 @@ final class WriteCommand extends Command
 	}
 
 
-	protected function configure()
+	protected function configure(): void
 	{
 		parent::configure();
 		$this->setDescription('Writes supervisor configuration to file');
@@ -34,7 +34,7 @@ final class WriteCommand extends Command
 	}
 
 
-	protected function execute(InputInterface $input, OutputInterface $output)
+	protected function execute(InputInterface $input, OutputInterface $output): int
 	{
 		$file = $input->getArgument('file');
 		$writer = new IniFileWriter($file);
