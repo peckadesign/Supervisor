@@ -15,19 +15,11 @@ use Supervisor\Configuration\Section\Named;
 final class SupervisorExtension extends CompilerExtension
 {
 
-	const DEFAULTS = [
-		'prefix' => NULL,
-		'configuration' => [],
-		'defaults' => [],
-		'group' => NULL,
-	];
-
-
-	public function loadConfiguration()
+	public function loadConfiguration(): void
 	{
 		$builder = $this->getContainerBuilder();
 
-		$config = \Pd\Supervisor\Adapter\Nette\DI\CompilerExtensionAdapter::mergeConfigWithDefaults($this, self::DEFAULTS);
+		$config = $this->getConfig();
 
 		if ( ! isset($config['prefix'])) {
 			throw new \Pd\Supervisor\DI\MissingConfigurationValueException(
@@ -65,7 +57,18 @@ final class SupervisorExtension extends CompilerExtension
 	}
 
 
-	private function loadSupervisorConfiguration(array $config, array $defaults, string $prefix, ?string $group)
+	public function getConfigSchema(): \Nette\Schema\Schema
+	{
+		return \Nette\Schema\Expect::structure([
+			'prefix' => \Nette\Schema\Expect::string()->nullable(),
+			'configuration' => \Nette\Schema\Expect::array(),
+			'defaults' => \Nette\Schema\Expect::array(),
+			'group' => \Nette\Schema\Expect::string()->nullable(),
+		]);
+	}
+
+
+	private function loadSupervisorConfiguration(array $config, array $defaults, string $prefix, ?string $group): void
 	{
 		$builder = $this->getContainerBuilder();
 
@@ -81,7 +84,7 @@ final class SupervisorExtension extends CompilerExtension
 				foreach ((array) $sectionConfig as $name => $properties) {
 					$name = $this->prepareName($name, $prefix);
 					$configuration->addSetup('addSection', [
-						\Pd\Supervisor\Adapter\Nette\DI\DiStatementFactory::createDiStatement($sectionClass, [
+						new \Nette\DI\Definitions\Statement($sectionClass, [
 							$name,
 							isset($defaults[$sectionName]) ? $this->mergeProperties($properties, $defaults[$sectionName]) : $properties,
 						]),
@@ -89,7 +92,7 @@ final class SupervisorExtension extends CompilerExtension
 				}
 			} else {
 				$configuration->addSetup('addSection', [
-					\Pd\Supervisor\Adapter\Nette\DI\DiStatementFactory::createDiStatement(
+					new \Nette\DI\Definitions\Statement(
 						$sectionClass, [
 						isset($defaults[$sectionName]) ? $this->mergeProperties($sectionConfig, $defaults[$sectionName]) : $sectionConfig,
 					]),
@@ -141,7 +144,7 @@ final class SupervisorExtension extends CompilerExtension
 
 		$sectionClass = (new Configuration)->findSection('group');
 		$configuration->addSetup('addSection', [
-			\Pd\Supervisor\Adapter\Nette\DI\DiStatementFactory::createDiStatement(
+			new \Nette\DI\Definitions\Statement(
 				$sectionClass,
 				[
 					$group,
