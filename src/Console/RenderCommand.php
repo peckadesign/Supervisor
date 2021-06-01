@@ -2,9 +2,6 @@
 
 namespace Pd\Supervisor\Console;
 
-use Nette\DI\Container;
-use Supervisor\Configuration\Configuration;
-use Supervisor\Configuration\Writer\HasIniRenderer;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -13,35 +10,33 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class RenderCommand extends Command
 {
 
-	use HasIniRenderer;
+	private \Supervisor\Configuration\Configuration $configuration;
 
-	/**
-	 * @var Container
-	 */
-	private $container;
+	private \Indigo\Ini\Renderer $renderer;
 
 
-	public function __construct(string $name, Container $container)
+	public function __construct(
+		string $name,
+		\Supervisor\Configuration\Configuration $configuration,
+		\Indigo\Ini\Renderer $renderer
+	)
 	{
 		parent::__construct($name);
-		$this->container = $container;
+		$this->configuration = $configuration;
+		$this->renderer = $renderer;
 	}
 
 
-	protected function configure()
+	protected function configure(): void
 	{
 		parent::configure();
 		$this->setDescription('Renders supervisor configuration');
 	}
 
 
-	protected function execute(InputInterface $input, OutputInterface $output)
+	protected function execute(InputInterface $input, OutputInterface $output): int
 	{
-		/**
-		 * @var Configuration $configuration
-		 */
-		$configuration = $this->container->getByType(Configuration::class);
-		$output->write($this->getRenderer()->render($configuration->toArray()));
+		$output->write($this->renderer->render($this->configuration->toArray()));
 
 		return 0;
 	}

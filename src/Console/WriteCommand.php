@@ -2,10 +2,6 @@
 
 namespace Pd\Supervisor\Console;
 
-use League\Flysystem\Adapter\Local;
-use League\Flysystem\Filesystem;
-use Nette\DI\Container;
-use Supervisor\Configuration\Configuration;
 use Supervisor\Configuration\Exception\LoaderException;
 use Supervisor\Configuration\Loader\IniFileLoader;
 use Supervisor\Configuration\Writer\IniFileWriter;
@@ -19,20 +15,17 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class WriteCommand extends Command
 {
 
-	/**
-	 * @var Container
-	 */
-	private $container;
+	private \Supervisor\Configuration\Configuration $configuration;
 
 
-	public function __construct(string $name, Container $container)
+	public function __construct(string $name, \Supervisor\Configuration\Configuration $configuration)
 	{
 		parent::__construct($name);
-		$this->container = $container;
+		$this->configuration = $configuration;
 	}
 
 
-	protected function configure()
+	protected function configure(): void
 	{
 		parent::configure();
 		$this->setDescription('Writes supervisor configuration to file');
@@ -41,30 +34,28 @@ final class WriteCommand extends Command
 	}
 
 
-	protected function execute(InputInterface $input, OutputInterface $output)
+	protected function execute(InputInterface $input, OutputInterface $output): int
 	{
-		$filesystemAdapter = new Local(getcwd());
-		$filesystem = new Filesystem($filesystemAdapter);
 		$file = $input->getArgument('file');
-		$writer = new IniFileWriter($filesystem, $file);
-		/**
-		 * @var Configuration $configuration
-		 */
-		$configuration = $this->container->getByType(Configuration::class);
+		$writer = new IniFileWriter($file);
+
 		if ($input->getOption('merge')) {
-			$loader = new IniFileLoader($filesystem, $file);
+			$loader = new IniFileLoader($file);
 			try {
-				$loader->load($configuration);
+				$loader->load($this->configuration);
 			} catch (LoaderException $exception) {
 				$output->writeln($exception->getMessage());
 
 				return 1;
 			}
 		}
-		if ($writer->write($configuration)) {
-			$output->writeln(sprintf('Supervisor configuration has been successfully written to file %s', $filesystemAdapter->applyPathPrefix($file)));
+		try {
+			$writer->write($this->configuration);
+			$output->writeln(sprintf('Supervisor configuration has been successfully written to file %s', $file));
 
 			return 0;
+		} catch (\Supervisor\Configuration\Exception\WriterException $e) {
+			$output->writeln($e->getMessage());
 		}
 
 		return 1;
