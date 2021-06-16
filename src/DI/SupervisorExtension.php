@@ -19,7 +19,7 @@ final class SupervisorExtension extends CompilerExtension
 	{
 		$builder = $this->getContainerBuilder();
 
-		$config = $this->getConfig();
+		$config = (array) $this->getConfig();
 
 		if ( ! isset($config['prefix'])) {
 			throw new \Pd\Supervisor\DI\MissingConfigurationValueException(
