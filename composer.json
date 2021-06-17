@@ -26,7 +26,7 @@
 		"php": "^7.4 | ^8.0",
 		"nette/application": "^3.0.0",
 		"nette/di": "~3.0.0",
-		"kdyby/console": "~4.2.0|dev-master",
+		"kdyby/console": "~2.8|dev-master",
 		"supervisorphp/configuration": "^0.3"
 	},
 	"require-dev": {
