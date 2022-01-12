@@ -2,7 +2,6 @@
 
 namespace Pd\Supervisor\DI;
 
-use Kdyby\Console\DI\ConsoleExtension;
 use Nette\DI\CompilerExtension;
 use Nette\DI\Helpers;
 use Pd\Supervisor\Console\RenderCommand;
@@ -48,11 +47,11 @@ final class SupervisorExtension extends CompilerExtension
 
 		$builder->addDefinition($this->prefix('renderCommand'))
 			->setFactory(RenderCommand::class, [strtr($this->prefix('render'), '.', ':')])
-			->addTag(ConsoleExtension::TAG_COMMAND)
+			->addTag('console.command')
 		;
 		$builder->addDefinition($this->prefix('writeCommand'))
 			->setFactory(WriteCommand::class, [strtr($this->prefix('write'), '.', ':')])
-			->addTag(ConsoleExtension::TAG_COMMAND)
+			->addTag('console.command')
 		;
 	}
 

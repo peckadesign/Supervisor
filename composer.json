@@ -26,7 +26,7 @@
 		"php": "^7.4 | ^8.0",
 		"nette/application": "^3.0.0",
 		"nette/di": "~3.0.0",
-		"kdyby/console": "~2.8|dev-master",
+		"symfony/console": "^4.2.5|^5.0.0",
 		"supervisorphp/configuration": "^0.3"
 	},
 	"require-dev": {
@@ -35,7 +35,8 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Pd\\Supervisor\\": "src/"
+			"Pd\\Supervisor\\": "src/",
+			"PdTests\\Supervisor": "tests/"
 		}
 	}
 }
