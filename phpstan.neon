@@ -1,8 +1,2 @@
 parameters:
 	ignoreErrors:
-		-
-			message: "#^Call to function is_subclass_of\\(\\) with non\\-empty\\-string\\|true and 'Supervisor\\\\\\\\Configuration\\\\\\\\Section\\\\\\\\Named' will always evaluate to false\\.$#"
-			count: 1
-			path: src/DI/SupervisorExtension.php
-
-
