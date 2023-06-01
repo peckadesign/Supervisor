@@ -25,8 +25,8 @@
 	"require": {
 		"php": "^7.4 | ^8.0",
 		"nette/application": "^3.0.0",
-		"nette/di": "~3.0.0",
-		"kdyby/console": "~4.0",
+		"nette/di": "^3.0.0",
+		"symfony/console": "^3.0|^4.0|^5.0|^6.0",
 		"supervisorphp/configuration": "^0.3"
 	},
 	"require-dev": {
