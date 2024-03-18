@@ -36,6 +36,7 @@ final class SupervisorExtension extends CompilerExtension
 		$this->loadSupervisorConfiguration(
 			(array) $config['configuration'],
 			(array) $config['defaults'],
+			(array) $config['overrides'],
 			(string) $config['prefix'],
 			isset($config['group']) ? (string) $config['group'] : NULL
 		);
@@ -59,10 +60,33 @@ final class SupervisorExtension extends CompilerExtension
 	{
 		return \Nette\Schema\Expect::structure([
 			'prefix' => \Nette\Schema\Expect::string()->nullable(),
-			'configuration' => \Nette\Schema\Expect::array(),
-			'defaults' => \Nette\Schema\Expect::array(),
+			'configuration' => \Nette\Schema\Expect::array()->default([]),
+			'overrides' => $this->getOverrideSchema()->default([]),
+			'defaults' => \Nette\Schema\Expect::array()->default([]),
 			'group' => \Nette\Schema\Expect::string()->nullable(),
 		]);
+	}
+
+	public function getOverrideSchema(): \Nette\Schema\Elements\Type
+	{
+		$isRegExp = static function (string $value): bool {
+			try {
+				return @preg_match($value, '') !== FALSE; // @ - is intentional
+			} catch (\Throwable $e) {
+				return FALSE;
+			}
+		};
+
+		return \Nette\Schema\Expect::arrayOf(
+			\Nette\Schema\Expect::structure([
+				'match' => \Nette\Schema\Expect::structure([
+						'name' => \Nette\Schema\Expect::string()->required(false)->assert($isRegExp, 'Must be valid regular expression'),
+						'property' => \Nette\Schema\Expect::string()->required(false)->assert($isRegExp, 'Must be valid regular expression'),
+						'value' => \Nette\Schema\Expect::string()->required(false)->assert($isRegExp, 'Must be valid regular expression'),
+					])->castTo('array'),
+				'value' => \Nette\Schema\Expect::scalar(),
+			])->castTo('array'),
+		);
 	}
 
 
@@ -70,13 +94,10 @@ final class SupervisorExtension extends CompilerExtension
 	 * @param array<string, mixed> $config
 	 * @param array<string, mixed> $defaults
 	 */
-	private function loadSupervisorConfiguration(array $config, array $defaults, string $prefix, ?string $group): void
+	private function loadSupervisorConfiguration(array $config, array $defaults, array $overrides, string $prefix, ?string $group): void
 	{
 		$builder = $this->getContainerBuilder();
-
-		$configuration = $builder->addDefinition($this->prefix('configuration'))
-			->setType(Configuration::class)
-		;
+		$configuration = $builder->addDefinition($this->prefix('configuration'))->setType(Configuration::class);
 
 		foreach ($config as $sectionName => $sectionConfig) {
 			if ( ! $sectionClass = (new Configuration)->findSection($sectionName)) {
@@ -85,10 +106,13 @@ final class SupervisorExtension extends CompilerExtension
 			if (is_subclass_of($sectionClass, Named::class)) {
 				foreach ((array) $sectionConfig as $name => $properties) {
 					$name = $this->prepareName($name, $prefix);
+					$properties = isset($defaults[$sectionName]) ? $this->mergeProperties($properties, $defaults[$sectionName]) : $properties;
+					$properties = $this->processOverrides($overrides, $name, $properties);
+
 					$configuration->addSetup('addSection', [
 						new \Nette\DI\Definitions\Statement($sectionClass, [
 							$name,
-							isset($defaults[$sectionName]) ? $this->mergeProperties($properties, $defaults[$sectionName]) : $properties,
+							$properties,
 						]),
 					]);
 				}
@@ -103,6 +127,29 @@ final class SupervisorExtension extends CompilerExtension
 		}
 
 		$this->prepareGroup($config, $configuration, $prefix, $group);
+	}
+
+	private function processOverrides(array $overrides, string $name, array $properties): array
+	{
+		foreach ($overrides as $item) {
+			if (!\is_null($item['match']['name']) && !preg_match($item['match']['name'], $name)) {
+				continue;
+			}
+
+			foreach ($properties as $property => $value) {
+				if (!\is_null($item['match']['property']) && !preg_match($item['match']['property'], $property)) {
+					continue;
+				}
+
+				if (!\is_null($item['match']['value']) && !preg_match($item['match']['value'], (string) $value)) {
+					continue;
+				}
+
+				$properties[$property] = $item['value'];
+			}
+		}
+
+		return $properties;
 	}
 
 
